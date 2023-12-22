@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.http import response
-from .models import Machine,Component,Activity,Schedule,ChangeSeeker,ChangeType,Report,Users,Task
+from .models import Machine,Component,Activity,Schedule,ChangeSeeker,ChangeType,Report,Users,Task,Status
 from django.core import serializers
 from django.shortcuts import get_list_or_404
 import json
@@ -63,6 +63,7 @@ def UpadateHandler(req):
             activity_machine_id=machineIdn,
             activity_component_id=componentIdn,
             activity_schedule_id=scheduleIdn,
+            activity_status_id=Status.objects.get(status_id=1)  
             )
         activity.save()
         return response.HttpResponse(1) 
@@ -199,3 +200,53 @@ def UserHandler(req):
         return JsonResponse(data={'response':response},safe=False)
     else:
         return JsonResponse({})
+    
+@csrf_exempt
+def TaskHandler(req):
+    if req.method=='POST':
+        str=req.body
+        jsonobj=json.loads(str)
+        print(jsonobj)
+        user=Users.objects.filter(user_name=jsonobj['task_assigned_to']).first()
+        activity=Activity.objects.filter(activity_id=jsonobj['task_activity_id']).first()
+        activity.activity_status_id=Status.objects.get(status_id=2)
+        print(user)
+        Task.objects.create(task_assign_to=user,task_activity_id=activity).save()
+        activity.save()
+        print(jsonobj)
+        return response.HttpResponse(100)
+    
+@csrf_exempt
+def ReportViewHandler(req):
+    if req.method=='POST':
+        body_unicode = req.body.decode('utf-8')
+        body_unicode_cleaned = body_unicode.strip()
+        # Remove non-alphanumeric characters, if needed
+        body_unicode_cleaned = re.sub(r'\W+', '', body_unicode_cleaned)
+        print(body_unicode_cleaned)
+
+        # Use the cleaned string in the filter
+        objAct=Activity.objects.filter(activity_id=int(body_unicode_cleaned)).first()
+        print(objAct)
+        obj = Report.objects.filter(report_activity=objAct).first()
+        print(obj)
+        return JsonResponse({"report":obj.report_text})
+    else:
+        return JsonResponse({})
+
+@csrf_exempt
+def updateActivity(req):
+    if req.method=='POST':
+        body_unicode = req.body.decode('utf-8')
+        body_unicode_cleaned = body_unicode.strip()
+        # Remove non-alphanumeric characters, if needed
+        body_unicode_cleaned = re.sub(r'\W+', '', body_unicode_cleaned)
+        print(body_unicode_cleaned)
+
+        # Use the cleaned string in the filter
+        objAct=Activity.objects.filter(activity_id=int(body_unicode_cleaned)).first()
+        objAct.activity_status_id=Status.objects.get(status_id=1)
+        objAct.save()
+        return response.HttpResponse(100)
+    else:
+        return response.HttpResponse("access denied")

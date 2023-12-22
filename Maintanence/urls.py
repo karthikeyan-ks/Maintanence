@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from home.views import MachineHandler,ComponentHandler,ScheduleHandler,UpadateHandler,ActivityHandler,CheckHandler,checkDoubleHandler,checkLast,loginHandler,checkTask,submitHandler,UserHandler
+from home.views import MachineHandler,ComponentHandler,ScheduleHandler,UpadateHandler,ActivityHandler,CheckHandler,checkDoubleHandler,checkLast,loginHandler,checkTask,submitHandler,UserHandler,TaskHandler,ReportViewHandler,updateActivity
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -31,5 +31,8 @@ urlpatterns = [
     path('home/login',loginHandler),
     path('home/checkTask',checkTask),
     path('home/submit',submitHandler),
-    path('home/users',UserHandler)
+    path('home/users',UserHandler),
+    path('home/uploadAssignment',TaskHandler),
+    path('home/reportView',ReportViewHandler),
+    path('home/activityUpdate',updateActivity)
 ]
